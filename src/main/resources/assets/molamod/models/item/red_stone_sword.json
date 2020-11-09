@@ -1,0 +1,6 @@
+{
+  "parent": "item/handheld",
+  "textures": {
+    "layer0": "molamod:item/red_stone_sword"
+  }
+}
