@@ -20,23 +20,23 @@ public class CustomItemHandler {
     /**
      * 物品列表
      */
-    private Map<String, Item> itemMap = Maps.newConcurrentMap();
+    private Map<Class<? extends Item>, Item> itemMap = Maps.newConcurrentMap();
 
     /**
      * 注册物品
      * @param item
      */
     public void add(Item item) {
-        itemMap.putIfAbsent(item.getRegistryName().toString(), item);
+        itemMap.putIfAbsent(item.getClass(), item);
     }
 
     /**
      * 获取物品
-     * @param name
+     * @param clazz
      * @return
      */
-    public Item getItem(String name) {
-        return itemMap.get(name);
+    public Item getItem(Class<? extends Item> clazz) {
+        return itemMap.get(clazz);
     }
 
     public List<Item> getItemList() {

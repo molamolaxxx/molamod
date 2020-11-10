@@ -13,7 +13,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -53,6 +52,10 @@ public class ExplosionMagicBook extends Item implements IModelRender {
      */
     // 伤害爆炸威力/范围，普通苦力怕为3.0，TNT为4.0或者更大一点，末影水晶为6.0
     private float explosionDamage = 2.5f;
+    private float explosionDistance = 2.5f;
+
+    private boolean useFire = true;
+    private boolean brokingBlock = false;
 
     public ExplosionMagicBook() {
         // 设置该物品在Forge中的注册名（必选，通常和unlocalizedName一致）
@@ -78,11 +81,16 @@ public class ExplosionMagicBook extends Item implements IModelRender {
             CommandUtil.sendMessage(player, "魔法书启动【爆炸】");
             RayTraceResult lookingAt = Minecraft.getMinecraft().objectMouseOver;
             if (lookingAt != null) {
-                BlockPos pos = lookingAt.getBlockPos();
+//                BlockPos pos = lookingAt.getBlockPos();
                 Vec3d hitVec = lookingAt.hitVec;
+                Vec3d playerVec = player.getPositionVector();
                 CommandUtil.sendMessage(player, "hit = " + hitVec.toString());
-                CommandUtil.sendMessage(player, "block = " + pos.toString());
-                displayExplosion(world, player, hitVec.x, hitVec.y, hitVec.z);
+//                CommandUtil.sendMessage(player, "block = " + pos.toString());
+                CommandUtil.sendMessage(player, "pos = " + playerVec.toString());
+                // 爆炸距离可调节
+                Vec3d finalVec = getFinalExplosionPos(hitVec, playerVec);
+                // 爆炸
+                displayExplosion(world, player, finalVec.x, hitVec.y, finalVec.z);
                 return new ActionResult(EnumActionResult.SUCCESS, player.getHeldItem(handIn));
             } else {
                 CommandUtil.sendMessage(player, "光线追踪为空");
@@ -116,13 +124,68 @@ public class ExplosionMagicBook extends Item implements IModelRender {
      * @param z
      */
     private void displayExplosion(World world, EntityPlayer player, double x, double y, double z) {
-        world.createExplosion(null, x, y, z, explosionDamage, true);
+        world.newExplosion(null, x, y, z, explosionDamage, useFire, brokingBlock);
         // 技能冷却计时
         isInCoolingStatus.compareAndSet(false, true);
         coolingRecoveryTimer();
     }
 
+    /**
+     * 根据爆炸距离，算出爆炸发生的真正位置
+     * @param hitVec
+     * @param playerVec
+     * @return
+     */
+    public Vec3d getFinalExplosionPos(Vec3d hitVec, Vec3d playerVec) {
+        float distance = explosionDistance;
+        if (distance < 1.0f) {
+            distance = 1.0f;
+        }
+        double nextX = playerVec.x + (hitVec.x - playerVec.x) * distance;
+        double nextY = playerVec.y + (hitVec.y - playerVec.y) * distance;
+        double nextZ = playerVec.z + (hitVec.z - playerVec.z) * distance;
+        return new Vec3d(nextX, nextY, nextZ);
+    }
+
+    public float getExplosionDamage() {
+        return explosionDamage;
+    }
+
+    public float getExplosionDistance() {
+        return explosionDistance;
+    }
+
+    public void setExplosionDistance(float explosionDistance) {
+        this.explosionDistance = explosionDistance;
+    }
+
+    public boolean isUseFire() {
+        return useFire;
+    }
+
+    public void setUseFire(boolean useFire) {
+        this.useFire = useFire;
+    }
+
+    public boolean isBrokingBlock() {
+        return brokingBlock;
+    }
+
+    public void setBrokingBlock(boolean brokingBlock) {
+        this.brokingBlock = brokingBlock;
+    }
+
     public void setExplosionDamage(float explosionDamage) {
         this.explosionDamage = explosionDamage;
+    }
+
+    @Override
+    public String toString() {
+        return "ExplosionMagicBook{" +
+                "explosionDamage=" + explosionDamage +
+                ", explosionDistance=" + explosionDistance +
+                ", useFire=" + useFire +
+                ", brokingBlock=" + brokingBlock +
+                '}';
     }
 }
