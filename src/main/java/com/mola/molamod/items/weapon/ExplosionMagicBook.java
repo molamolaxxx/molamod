@@ -13,6 +13,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -26,7 +27,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * @author : molamola
  * @Project: forge-1.12.2-14.23.5.2847-mdk
- * @Description: 魔法书，可以爆炸
+ * @Description: 魔法书，可以制造爆炸效果
  * @date : 2020-11-08 11:57
  **/
 @CustomItem
@@ -66,27 +67,21 @@ public class ExplosionMagicBook extends Item implements IModelRender {
         this.setCreativeTab(CreativeTabs.COMBAT);
     }
 
-
     @Override
     public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand handIn) {
-//        CommandUtil.sendMessage(playerIn, "world = " + world.toString());
         if (isInCoolingStatus.get()) {
-            CommandUtil.sendMessage(player, "技能正在冷却");
             return new ActionResult(EnumActionResult.PASS, player.getHeldItem(handIn));
         }
 
         // 1、只用WorldServer才能实现爆炸效果， 否则用不了
         if (null != world && world instanceof WorldServer) {
             // 爆炸逻辑
-            CommandUtil.sendMessage(player, "魔法书启动【爆炸】");
             RayTraceResult lookingAt = Minecraft.getMinecraft().objectMouseOver;
             if (lookingAt != null) {
-//                BlockPos pos = lookingAt.getBlockPos();
                 Vec3d hitVec = lookingAt.hitVec;
                 Vec3d playerVec = player.getPositionVector();
-                CommandUtil.sendMessage(player, "hit = " + hitVec.toString());
-//                CommandUtil.sendMessage(player, "block = " + pos.toString());
-                CommandUtil.sendMessage(player, "pos = " + playerVec.toString());
+                // 绘制火焰粒子效果
+                spawnParticle(world, player);
                 // 爆炸距离可调节
                 Vec3d finalVec = getFinalExplosionPos(hitVec, playerVec);
                 // 爆炸
@@ -96,6 +91,8 @@ public class ExplosionMagicBook extends Item implements IModelRender {
                 CommandUtil.sendMessage(player, "光线追踪为空");
             }
         }
+        // 挥手
+        player.swingArm(EnumHand.MAIN_HAND);
         return new ActionResult(EnumActionResult.PASS, player.getHeldItem(handIn));
     }
 
@@ -145,6 +142,33 @@ public class ExplosionMagicBook extends Item implements IModelRender {
         double nextY = playerVec.y + (hitVec.y - playerVec.y) * distance;
         double nextZ = playerVec.z + (hitVec.z - playerVec.z) * distance;
         return new Vec3d(nextX, nextY, nextZ);
+    }
+
+    /**
+     * EnumParticleTypes particleType,
+     * boolean longDistance, double xCoord, double yCoord, double zCoord,
+     * int numberOfParticles,
+     * double xOffset, double yOffset, double zOffset,
+     * double particleSpeed, int... particleArguments
+     * @param world
+     * @param player
+     */
+    public void spawnParticle(World world, EntityPlayer player) {
+        Vec3d playerVec = player.getPositionVector();
+        WorldServer worldServer = (WorldServer) world;
+        worldServer.spawnParticle(
+                EnumParticleTypes.FLAME, // 火焰粒子
+                true,
+                playerVec.x,
+                playerVec.y + (double) player.eyeHeight,
+                playerVec.z,
+                50, // 粒子个数
+                4.5,
+                2,
+                4.5,
+                1.2,
+                new int[0]
+        );
     }
 
     public float getExplosionDamage() {
