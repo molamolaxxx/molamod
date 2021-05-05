@@ -1,12 +1,12 @@
-package com.mola.molamod.items.weapon;
+package com.mola.molamod.items.magic;
 
+import com.mola.molamod.MolaMod;
 import com.mola.molamod.annotation.CustomItem;
 import com.mola.molamod.items.IModelRender;
 import com.mola.molamod.utils.CommandUtil;
 import com.mola.molamod.utils.LoggerUtil;
 import com.mola.molamod.utils.ModelLoaderUtil;
 import net.minecraft.client.Minecraft;
-import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -43,16 +43,16 @@ public class ExplosionMagicBook extends Item implements IModelRender {
     private AtomicBoolean isInCoolingStatus = new AtomicBoolean(false);
 
     /**
-     * 冷却时间，默认3s
+     * 冷却时间，默认1s和等级相关
      */
-    private long coolingDuring = 3000L;
+    private long coolingDuring = 1000L;
     private final Timer coolingTimer = new Timer();
 
     /**
      * 属性
      */
     // 伤害爆炸威力/范围，普通苦力怕为3.0，TNT为4.0或者更大一点，末影水晶为6.0
-    private float explosionDamage = 2.5f;
+    private float explosionDamage = 3f;
     private float explosionDistance = 2.5f;
 
     private boolean useFire = true;
@@ -64,7 +64,9 @@ public class ExplosionMagicBook extends Item implements IModelRender {
         // 设置该物品的非本地化名称
         this.setUnlocalizedName("mola." + name);
         // 设置该物品所在的创造模式物品栏列表
-        this.setCreativeTab(CreativeTabs.COMBAT);
+        this.setCreativeTab(MolaMod.MOLA_TAB);
+        // 单个物品栈最多堆叠1个
+        this.maxStackSize = 1;
     }
 
     @Override
@@ -102,14 +104,19 @@ public class ExplosionMagicBook extends Item implements IModelRender {
         ModelLoaderUtil.setCustomModelResourceLocation(this, 0, "inventory");
     }
 
-    private void coolingRecoveryTimer() {
+    private void coolingRecoveryTimer(int level) {
+        float mul  = 1f;
+        if (level != 0) {
+            mul = 10 / level;
+            if (mul > 1) mul = 1;
+        }
         coolingTimer.schedule(
                 new TimerTask() {
                     @Override
                     public void run() {
                         isInCoolingStatus.compareAndSet(true, false);
                     }
-                }, coolingDuring);
+                }, (long) (coolingDuring*mul));
     }
 
     /**
@@ -124,7 +131,7 @@ public class ExplosionMagicBook extends Item implements IModelRender {
         world.newExplosion(null, x, y, z, explosionDamage, useFire, brokingBlock);
         // 技能冷却计时
         isInCoolingStatus.compareAndSet(false, true);
-        coolingRecoveryTimer();
+        coolingRecoveryTimer(player.experienceLevel);
     }
 
     /**

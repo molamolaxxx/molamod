@@ -1,6 +1,5 @@
 package com.mola.molamod.items;
 
-import com.mola.molamod.annotation.CustomItem;
 import com.mola.molamod.utils.ModelLoaderUtil;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
@@ -12,7 +11,6 @@ import net.minecraft.item.ItemStack;
  * @Description:
  * @date : 2020-11-03 18:24
  **/
-@CustomItem
 public class MyFirstItem extends Item implements IModelRender{
 
     private static final String name = "mola_item";

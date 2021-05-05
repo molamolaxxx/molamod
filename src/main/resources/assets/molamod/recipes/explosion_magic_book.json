@@ -1,0 +1,19 @@
+{
+    "type": "forge:ore_shaped",
+    "pattern": [
+        "###",
+        "#X#",
+        "###"
+        ],
+    "key": {
+        "X": {
+            "item": "minecraft:apple"
+        },
+        "#": {
+            "item": "minecraft:book"
+        }
+    },
+    "result": {
+        "item": "molamod:explosion_magic_book"
+    }
+}

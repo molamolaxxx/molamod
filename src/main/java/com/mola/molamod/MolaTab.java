@@ -1,5 +1,7 @@
 package com.mola.molamod;
 
+import com.mola.molamod.factory.CustomHandlerManager;
+import com.mola.molamod.items.magic.ExplosionMagicBook;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.ItemStack;
 
@@ -16,6 +18,7 @@ public class MolaTab extends CreativeTabs {
 
     @Override
     public ItemStack getTabIconItem() {
-        return null;
+        return new ItemStack(CustomHandlerManager.getItemHandler()
+                .getItem(ExplosionMagicBook.class));
     }
 }

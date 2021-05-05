@@ -10,20 +10,20 @@ import net.minecraft.server.MinecraftServer;
 /**
  * @author : molamola
  * @Project: forge-1.12.2-14.23.5.2847-mdk
- * @Description: 发送命令消息
- * @date : 2020-11-08 10:15
+ * @Description:
+ * @date : 2021-05-02 12:32
  **/
 @CustomCommand
-public class CommandSendMessage extends CommandBase {
+public class MyTestCommand extends CommandBase {
 
     @Override
     public String getName() {
-        return "molatest";
+        return "myTest";
     }
 
     @Override
     public String getUsage(ICommandSender sender) {
-        return "commands.molatest.usage";
+        return "commands.myTest.usage";
     }
 
     @Override

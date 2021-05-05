@@ -2,7 +2,7 @@ package com.mola.molamod.commands;
 
 import com.mola.molamod.annotation.CustomCommand;
 import com.mola.molamod.factory.CustomHandlerManager;
-import com.mola.molamod.items.weapon.ExplosionMagicBook;
+import com.mola.molamod.items.magic.ExplosionMagicBook;
 import com.mola.molamod.utils.CommandUtil;
 import com.mola.molamod.utils.LoggerUtil;
 import net.minecraft.command.CommandBase;

@@ -10,24 +10,29 @@ import net.minecraft.server.MinecraftServer;
 /**
  * @author : molamola
  * @Project: forge-1.12.2-14.23.5.2847-mdk
- * @Description: 发送命令消息
- * @date : 2020-11-08 10:15
+ * @Description: 添加等级
+ * @date : 2021-05-05 12:46
  **/
 @CustomCommand
-public class CommandSendMessage extends CommandBase {
-
+public class CommandAddLevel extends CommandBase {
     @Override
     public String getName() {
-        return "molatest";
+        return "addLevel";
     }
 
     @Override
     public String getUsage(ICommandSender sender) {
-        return "commands.molatest.usage";
+        return "command.addLevel.usage";
     }
 
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-        CommandUtil.sendMessage(sender, this.getClass().getName());
+        if (args.length != 1) {
+            CommandUtil.reportError(sender, "参数错误，后面接等级");
+            return;
+        }
+        server.getPlayerList().getPlayers().forEach(p -> {
+            p.addExperienceLevel(Integer.valueOf(args[0]));
+        });
     }
 }
