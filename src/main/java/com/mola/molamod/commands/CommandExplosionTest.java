@@ -17,6 +17,7 @@ import net.minecraft.world.World;
  **/
 @CustomCommand
 public class CommandExplosionTest extends CommandBase {
+
     @Override
     public String getName() {
         return "mola_explosion";

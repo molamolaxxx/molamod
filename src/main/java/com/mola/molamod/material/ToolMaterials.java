@@ -15,8 +15,8 @@ public class ToolMaterials {
             EnumHelper.addToolMaterial(
                     "REDSTONE",
                     3,
-                    222,
+                    20,
                     13.5F,
-                    20.0F,
+                    10.0F,
                     12);
 }
