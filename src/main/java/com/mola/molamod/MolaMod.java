@@ -1,11 +1,11 @@
 package com.mola.molamod;
 
-import com.mola.molamod.factory.CustomHandlerManager;
-import com.mola.molamod.factory.CustomHandlerRegistry;
+import com.mola.molamod.proxy.CommonProxy;
 import com.mola.molamod.utils.LoggerUtil;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
+import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -21,27 +21,32 @@ public class MolaMod
 
     public static final CreativeTabs MOLA_TAB = new MolaTab("molatab");
 
+    @SidedProxy(clientSide = "com.mola.molamod.proxy.ClientProxy",
+            serverSide = "com.mola.molamod.proxy.CommonProxy")
+    private static CommonProxy proxy;
+
     private static Logger logger;
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         initLogger(event);
-        // 扫描包下实体
-        CustomHandlerRegistry.scanningInPackage();
+        proxy.preInit(event);
     }
 
     @EventHandler
     public void init(FMLInitializationEvent event) {
-        logger.info("molamola-Mod : {}", "mola模组初始化");
+        logger.info("molamola-Mod : {}，使用proxy : {} ", "mola模组初始化", proxy.getClass().getName());
+        proxy.init(event);
     }
 
     @EventHandler
     public void postInit(FMLPostInitializationEvent event) {
+        proxy.postInit(event);
     }
 
     @EventHandler
     public void serverStarting(FMLServerStartingEvent event) {
-        CustomHandlerManager.getCommandHandler().registerCommand(event);
+        proxy.serverStarting(event);
     }
 
     /**

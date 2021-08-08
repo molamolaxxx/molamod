@@ -1,5 +1,8 @@
 package com.mola.molamod.items;
 
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+
 /**
  * @author : molamola
  * @Project: molamod
@@ -11,5 +14,6 @@ public interface IModelRender {
     /**
      * 物品渲染
      */
+    @SideOnly(Side.CLIENT)
     void onItemRender();
 }

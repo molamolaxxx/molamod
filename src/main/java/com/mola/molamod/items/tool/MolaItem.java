@@ -1,9 +1,15 @@
-package com.mola.molamod.items;
+package com.mola.molamod.items.tool;
 
 import com.mola.molamod.MolaMod;
 import com.mola.molamod.annotation.CustomItem;
+import com.mola.molamod.items.IModelRender;
 import com.mola.molamod.utils.ModelLoaderUtil;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.EnumHand;
+import net.minecraft.world.World;
 
 /**
  * @author : molamola
@@ -27,6 +33,10 @@ public class MolaItem extends Item implements IModelRender {
         this.maxStackSize = 1;
     }
 
+    @Override
+    public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn) {
+        return super.onItemRightClick(worldIn, playerIn, handIn);
+    }
 
     @Override
     public void onItemRender() {
