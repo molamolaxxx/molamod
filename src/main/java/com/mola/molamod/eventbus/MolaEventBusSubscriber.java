@@ -27,6 +27,6 @@ public class MolaEventBusSubscriber {
 
         // subscribe
         logger.info("[onItemRegister] 开始注册物品");
-        CustomHandlerManager.getItemHandler().registerItems(event);
+        CustomHandlerManager.getItemHandler().registerItemsAndRendering(event);
     }
 }

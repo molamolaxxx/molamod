@@ -1,5 +1,6 @@
 package com.mola.molamod;
 
+import com.mola.molamod.proxy.ClientProxy;
 import com.mola.molamod.proxy.CommonProxy;
 import com.mola.molamod.utils.LoggerUtil;
 import net.minecraft.creativetab.CreativeTabs;
@@ -56,5 +57,13 @@ public class MolaMod
     private void initLogger(FMLPreInitializationEvent event) {
         logger = event.getModLog();
         LoggerUtil.init(logger);
+    }
+
+    /**
+     * 是否是单纯的client
+     * @return
+     */
+    public static boolean isServer() {
+        return !(proxy instanceof ClientProxy);
     }
 }

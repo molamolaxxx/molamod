@@ -1,7 +1,5 @@
 package com.mola.molamod.proxy;
 
-import com.mola.molamod.factory.CustomHandlerManager;
-import com.mola.molamod.factory.CustomHandlerRegistry;
 import com.mola.molamod.utils.LoggerUtil;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
@@ -20,8 +18,6 @@ public class ClientProxy extends CommonProxy{
     public void preInit(FMLPreInitializationEvent event) {
         LoggerUtil.getLogger().info("[ClientProxy] preInit");
         super.preInit(event);
-        // 扫描包下实体
-        CustomHandlerRegistry.scanningInPackage();
     }
 
     @Override
@@ -38,8 +34,6 @@ public class ClientProxy extends CommonProxy{
     public void serverStarting(FMLServerStartingEvent event) {
         LoggerUtil.getLogger().info("[ClientProxy] serverStarting");
         super.serverStarting(event);
-        // 注册命令
-        CustomHandlerManager.getCommandHandler().registerCommand(event);
     }
 
 }

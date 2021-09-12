@@ -3,10 +3,9 @@ package com.mola.molamod.items.magic;
 import com.mola.molamod.MolaMod;
 import com.mola.molamod.annotation.CustomItem;
 import com.mola.molamod.items.IModelRender;
-import com.mola.molamod.utils.CommandUtil;
 import com.mola.molamod.utils.LoggerUtil;
 import com.mola.molamod.utils.ModelLoaderUtil;
-import net.minecraft.client.Minecraft;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -52,8 +51,8 @@ public class ExplosionMagicBook extends Item implements IModelRender {
      * 属性
      */
     // 伤害爆炸威力/范围，普通苦力怕为3.0，TNT为4.0或者更大一点，末影水晶为6.0
-    private float explosionDamage = 3f;
-    private float explosionDistance = 2.5f;
+    private float explosionDamage = 2.8f;
+    private float explosionDistance = 2.15f;
 
     private boolean useFire = true;
     private boolean brokingBlock = false;
@@ -74,24 +73,19 @@ public class ExplosionMagicBook extends Item implements IModelRender {
         if (isInCoolingStatus.get()) {
             return new ActionResult(EnumActionResult.PASS, player.getHeldItem(handIn));
         }
-
-        // 1、只用WorldServer才能实现爆炸效果， 否则用不了
+        // 1、服务端执行逻辑，只用WorldServer才能实现爆炸效果， 否则用不了
         if (null != world && world instanceof WorldServer) {
+
             // 爆炸逻辑
-            RayTraceResult lookingAt = Minecraft.getMinecraft().objectMouseOver;
-            if (lookingAt != null) {
-                Vec3d hitVec = lookingAt.hitVec;
-                Vec3d playerVec = player.getPositionVector();
-                // 绘制火焰粒子效果
-                spawnParticle(world, player);
-                // 爆炸距离可调节
-                Vec3d finalVec = getFinalExplosionPos(hitVec, playerVec);
-                // 爆炸
-                displayExplosion(world, player, finalVec.x, hitVec.y, finalVec.z);
-                return new ActionResult(EnumActionResult.SUCCESS, player.getHeldItem(handIn));
-            } else {
-                CommandUtil.sendMessage(player, "光线追踪为空");
-            }
+            Vec3d hitVec = rayTraceHand(player, 30d).hitVec;
+            Vec3d playerVec = player.getPositionVector();
+            // 绘制火焰粒子效果
+            spawnParticle(world, player);
+            // 爆炸距离可调节
+            Vec3d finalVec = getFinalExplosionPos(hitVec, playerVec);
+            // 爆炸
+            displayExplosion(world, player, finalVec.x, hitVec.y, finalVec.z);
+            return new ActionResult(EnumActionResult.SUCCESS, player.getHeldItem(handIn));
         }
         // 挥手
         player.swingArm(EnumHand.MAIN_HAND);
@@ -176,6 +170,13 @@ public class ExplosionMagicBook extends Item implements IModelRender {
                 1.2,
                 new int[0]
         );
+    }
+
+    public static RayTraceResult rayTraceHand(EntityLivingBase entity, double length)
+    {
+        Vec3d startPos = new Vec3d(entity.posX, entity.posY + entity.getEyeHeight()/1.38, entity.posZ);
+        Vec3d endPos = startPos.add(new Vec3d(entity.getLookVec().x * length, entity.getLookVec().y * length, entity.getLookVec().z * length));
+        return entity.world.rayTraceBlocks(startPos, endPos);
     }
 
     public float getExplosionDamage() {

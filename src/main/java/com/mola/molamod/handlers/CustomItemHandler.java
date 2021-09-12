@@ -1,6 +1,7 @@
 package com.mola.molamod.handlers;
 
 import com.google.common.collect.Maps;
+import com.mola.molamod.MolaMod;
 import com.mola.molamod.factory.CustomHandlerManager;
 import com.mola.molamod.items.IModelRender;
 import com.mola.molamod.items.magic.ExplosionMagicBook;
@@ -24,7 +25,7 @@ public class CustomItemHandler {
     /**
      * 物品列表
      */
-    private Map<Class<? extends Item>, Item> itemMap = Maps.newConcurrentMap();
+    private Map<Class<? extends Item>, Item> itemMap = Maps.newLinkedHashMap();
 
     /**
      * 注册物品
@@ -50,16 +51,16 @@ public class CustomItemHandler {
     }
 
     /**
-     * 总线调用，注册物品
+     * 总线调用，注册物品，
      * @param event
      */
-    public void registerItems(RegistryEvent.Register<Item> event) {
+    public void registerItemsAndRendering(RegistryEvent.Register<Item> event) {
         for (Item item : this.getItemList()) {
+            event.getRegistry().register(item);
             // 渲染物品
-            if (item instanceof IModelRender) {
+            if (item instanceof IModelRender && !MolaMod.isServer()) {
                 ((IModelRender) item).onItemRender();
             }
-            event.getRegistry().register(item);
         }
     }
 
