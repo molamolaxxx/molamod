@@ -2,12 +2,8 @@ package com.mola.molamod.handlers;
 
 import com.google.common.collect.Maps;
 import com.mola.molamod.MolaMod;
-import com.mola.molamod.factory.CustomHandlerManager;
 import com.mola.molamod.items.IModelRender;
-import com.mola.molamod.items.magic.ExplosionMagicBook;
-import com.mola.molamod.items.weapon.ItemRedStoneSword;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraftforge.event.RegistryEvent;
 
 import java.util.List;
@@ -40,8 +36,8 @@ public class CustomItemHandler {
      * @param clazz
      * @return
      */
-    public Item getItem(Class<? extends Item> clazz) {
-        return itemMap.get(clazz);
+    public <T> T getItem(Class<T> clazz) {
+        return (T) itemMap.get(clazz);
     }
 
     public List<Item> getItemList() {
@@ -63,25 +59,4 @@ public class CustomItemHandler {
             }
         }
     }
-
-    public static class ItemStackHolder{
-
-        /**
-         * 魔法书与其配方
-         */
-        public static ItemStack EXPLOSION_MAGIC_BOOK_STACK = getItemStack(ExplosionMagicBook.class);
-        public static ItemStack BOOK_STACK_1 = new ItemStack(Item.getItemById(340),1);
-        public static ItemStack STICK_STACK_1 = new ItemStack(Item.getItemById(280),1);
-
-        public static ItemStack RED_STONE_SWORD_STACK = getItemStack(ItemRedStoneSword.class);
-
-        public static ItemStack getItemStack(Class clazz) {
-            return new ItemStack(CustomHandlerManager.getItemHandler().getItem(clazz));
-        }
-
-        public static ItemStack getItemStack(Class clazz, int amount) {
-            return new ItemStack(CustomHandlerManager.getItemHandler().getItem(clazz), amount);
-        }
-    }
-
 }

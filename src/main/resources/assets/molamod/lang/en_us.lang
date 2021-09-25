@@ -1,6 +1,7 @@
 
-item.mola.red_stone_sword.name=[best]redstonesword
-item.mola.explosion_magic_book.name=【best】explosioner
+item.mola.red_stone_sword.name=redstonesword
+item.mola.explosion_magic_book.name=explosioner
+item.mola.explosion_magic_book_max.name=explosioner-fire
 item.mola.mola_item.name=mola core
 item.mola.wbb_jp.name=wbb jp
 

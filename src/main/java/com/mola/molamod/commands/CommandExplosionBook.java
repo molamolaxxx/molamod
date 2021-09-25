@@ -43,7 +43,7 @@ public class CommandExplosionBook extends CommandBase {
                     "【5】book attr【查看属性值】");
             return;
         }
-        ExplosionMagicBook book = (ExplosionMagicBook) CustomHandlerManager.getItemHandler().getItem(ExplosionMagicBook.class);
+        ExplosionMagicBook book = CustomHandlerManager.getItemHandler().getItem(ExplosionMagicBook.class);
         if (args.length == 1 && "attr".equals(args[0])) {
             CommandUtil.sendMessage(sender, book.toString());
             return;

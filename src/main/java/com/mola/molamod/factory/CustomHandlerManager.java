@@ -2,6 +2,7 @@ package com.mola.molamod.factory;
 
 import com.mola.molamod.handlers.CustomCommandHandler;
 import com.mola.molamod.handlers.CustomItemHandler;
+import com.mola.molamod.handlers.CustomPacketHandler;
 
 /**
  * @author : molamola
@@ -22,6 +23,11 @@ public class CustomHandlerManager {
     private static final CustomCommandHandler commandHandler = new CustomCommandHandler();
 
     /**
+     * 数据包管理
+     */
+    private static final CustomPacketHandler packetHandler = new CustomPacketHandler();
+
+    /**
      * 获取item-handler
      * @return
      */
@@ -31,5 +37,9 @@ public class CustomHandlerManager {
 
     public static CustomCommandHandler getCommandHandler() {
         return CustomHandlerManager.commandHandler;
+    }
+
+    public static CustomPacketHandler getPacketHandler() {
+        return CustomHandlerManager.packetHandler;
     }
 }

@@ -2,11 +2,14 @@ package com.mola.molamod.factory;
 
 import com.mola.molamod.annotation.CustomCommand;
 import com.mola.molamod.annotation.CustomItem;
+import com.mola.molamod.annotation.CustomPacket;
 import com.mola.molamod.handlers.CustomCommandHandler;
 import com.mola.molamod.handlers.CustomItemHandler;
+import com.mola.molamod.handlers.CustomPacketHandler;
 import com.mola.molamod.utils.LoggerUtil;
 import net.minecraft.command.ICommand;
 import net.minecraft.item.Item;
+import net.minecraftforge.fml.relauncher.Side;
 import org.apache.http.util.Asserts;
 import org.apache.logging.log4j.Logger;
 
@@ -69,6 +72,13 @@ public class CustomHandlerRegistry {
                                             handleRegisterCommand(clazz);
                                             continue;
                                         }
+
+                                        // 注册数据包
+                                        CustomPacket customPacketAnnotation = clazz.getAnnotation(CustomPacket.class);
+                                        if (null != customPacketAnnotation) {
+                                            handleRegisterPacket(clazz, customPacketAnnotation);
+                                            continue;
+                                        }
                                     } catch (ClassNotFoundException e) {
                                         logger.error("[registry] 类加载异常", e);
                                     }
@@ -118,6 +128,13 @@ public class CustomHandlerRegistry {
             commandHandler.add((ICommand) target);
         } else {
             logger.error("[registry] handleRegisterCommand 出现错误, class = {}",clazz.toString() );
+        }
+    }
+
+    private static void handleRegisterPacket(Class clazz, CustomPacket customPacketAnnotation) {
+        CustomPacketHandler packetHandler = CustomHandlerManager.getPacketHandler();
+        for (Side side : customPacketAnnotation.side()) {
+            packetHandler.registerPacket(clazz, customPacketAnnotation.discriminator(), side);
         }
     }
 }

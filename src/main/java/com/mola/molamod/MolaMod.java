@@ -11,6 +11,8 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
+import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import org.apache.logging.log4j.Logger;
 
 @Mod(modid = MolaMod.MODID, name = MolaMod.NAME, version = MolaMod.VERSION)
@@ -26,11 +28,20 @@ public class MolaMod
             serverSide = "com.mola.molamod.proxy.CommonProxy")
     private static CommonProxy proxy;
 
+    @Mod.Instance
+    public static MolaMod instance;
+
+    /**
+     * 网络交互
+     */
+    private SimpleNetworkWrapper network;
+
     private static Logger logger;
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         initLogger(event);
+        network = NetworkRegistry.INSTANCE.newSimpleChannel(MODID);
         proxy.preInit(event);
     }
 
@@ -65,5 +76,9 @@ public class MolaMod
      */
     public static boolean isServer() {
         return !(proxy instanceof ClientProxy);
+    }
+
+    public static SimpleNetworkWrapper getNetwork() {
+        return instance.network;
     }
 }

@@ -1,24 +1,27 @@
 package com.mola.molamod.items.magic;
 
+import com.google.common.collect.Maps;
 import com.mola.molamod.MolaMod;
 import com.mola.molamod.annotation.CustomItem;
+import com.mola.molamod.constants.PositionEventCodeConstant;
 import com.mola.molamod.items.IModelRender;
+import com.mola.molamod.network.PositionSendPacket;
 import com.mola.molamod.utils.LoggerUtil;
 import com.mola.molamod.utils.ModelLoaderUtil;
-import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.EnumParticleTypes;
-import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -27,6 +30,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author : molamola
  * @Project: forge-1.12.2-14.23.5.2847-mdk
  * @Description: 魔法书，可以制造爆炸效果
+ * todo 1、鼠标指向传送到服务器 2、设置损耗
  * @date : 2020-11-08 11:57
  **/
 @CustomItem
@@ -51,13 +55,16 @@ public class ExplosionMagicBook extends Item implements IModelRender {
      * 属性
      */
     // 伤害爆炸威力/范围，普通苦力怕为3.0，TNT为4.0或者更大一点，末影水晶为6.0
-    private float explosionDamage = 2.8f;
-    private float explosionDistance = 2.15f;
+    private float explosionDamage = 3.5f;
+    private float explosionDistance = 2.2f;
 
-    private boolean useFire = true;
+    private boolean useFire = false;
     private boolean brokingBlock = false;
 
     public ExplosionMagicBook() {
+        if (this instanceof ExplosionMagicBookMax) {
+            return;
+        }
         // 设置该物品在Forge中的注册名（必选，通常和unlocalizedName一致）
         this.setRegistryName(name);
         // 设置该物品的非本地化名称
@@ -66,6 +73,8 @@ public class ExplosionMagicBook extends Item implements IModelRender {
         this.setCreativeTab(MolaMod.MOLA_TAB);
         // 单个物品栈最多堆叠1个
         this.maxStackSize = 1;
+        // 最多释放100次
+        setMaxDamage(100);
     }
 
     @Override
@@ -73,29 +82,32 @@ public class ExplosionMagicBook extends Item implements IModelRender {
         if (isInCoolingStatus.get()) {
             return new ActionResult(EnumActionResult.PASS, player.getHeldItem(handIn));
         }
-        // 1、服务端执行逻辑，只用WorldServer才能实现爆炸效果， 否则用不了
-        if (null != world && world instanceof WorldServer) {
+        ItemStack stack = player.getHeldItem(handIn);
 
-            // 爆炸逻辑
-            Vec3d hitVec = rayTraceHand(player, 30d).hitVec;
+        // 1、客户端执行逻辑
+        if (player instanceof EntityPlayerSP) {
+            Vec3d hitVec = Minecraft.getMinecraft().objectMouseOver.hitVec;
             Vec3d playerVec = player.getPositionVector();
-            // 绘制火焰粒子效果
-            spawnParticle(world, player);
-            // 爆炸距离可调节
             Vec3d finalVec = getFinalExplosionPos(hitVec, playerVec);
-            // 爆炸
-            displayExplosion(world, player, finalVec.x, hitVec.y, finalVec.z);
-            return new ActionResult(EnumActionResult.SUCCESS, player.getHeldItem(handIn));
+            displayExplosion(world, player, finalVec);
         }
+        // 损耗+1
+        setDamage(stack, getDamage(stack) - 1);
+
         // 挥手
         player.swingArm(EnumHand.MAIN_HAND);
-        return new ActionResult(EnumActionResult.PASS, player.getHeldItem(handIn));
+        return new ActionResult(EnumActionResult.PASS, stack);
     }
 
     @Override
     public void onItemRender() {
         logger.info("[item] 爆炸魔法书开始渲染");
         ModelLoaderUtil.setCustomModelResourceLocation(this, 0, "inventory");
+    }
+
+    @Override
+    public void onUpdate(ItemStack stack, World worldIn, Entity entityIn, int itemSlot, boolean isSelected) {
+        super.onUpdate(stack, worldIn, entityIn, itemSlot, isSelected);
     }
 
     private void coolingRecoveryTimer(int level) {
@@ -117,12 +129,14 @@ public class ExplosionMagicBook extends Item implements IModelRender {
      * 爆炸
      * @param world
      * @param player
-     * @param x
-     * @param y
-     * @param z
+     * @param finalVec
      */
-    private void displayExplosion(World world, EntityPlayer player, double x, double y, double z) {
-        world.newExplosion(null, x, y, z, explosionDamage, useFire, brokingBlock);
+    private void displayExplosion(World world, EntityPlayer player, Vec3d finalVec) {
+        Map<String,String> params = Maps.newHashMap();
+        params.put("className", this.getClass().getName());
+        // 发送爆炸位置到服务器
+        MolaMod.getNetwork().sendToServer(new PositionSendPacket(finalVec, PositionEventCodeConstant.MAGIC_BOOK_EXPLOSION, params));
+
         // 技能冷却计时
         isInCoolingStatus.compareAndSet(false, true);
         coolingRecoveryTimer(player.experienceLevel);
@@ -143,40 +157,6 @@ public class ExplosionMagicBook extends Item implements IModelRender {
         double nextY = playerVec.y + (hitVec.y - playerVec.y) * distance;
         double nextZ = playerVec.z + (hitVec.z - playerVec.z) * distance;
         return new Vec3d(nextX, nextY, nextZ);
-    }
-
-    /**
-     * EnumParticleTypes particleType,
-     * boolean longDistance, double xCoord, double yCoord, double zCoord,
-     * int numberOfParticles,
-     * double xOffset, double yOffset, double zOffset,
-     * double particleSpeed, int... particleArguments
-     * @param world
-     * @param player
-     */
-    public void spawnParticle(World world, EntityPlayer player) {
-        Vec3d playerVec = player.getPositionVector();
-        WorldServer worldServer = (WorldServer) world;
-        worldServer.spawnParticle(
-                EnumParticleTypes.FLAME, // 火焰粒子
-                true,
-                playerVec.x,
-                playerVec.y + (double) player.eyeHeight,
-                playerVec.z,
-                50, // 粒子个数
-                4.5,
-                2,
-                4.5,
-                1.2,
-                new int[0]
-        );
-    }
-
-    public static RayTraceResult rayTraceHand(EntityLivingBase entity, double length)
-    {
-        Vec3d startPos = new Vec3d(entity.posX, entity.posY + entity.getEyeHeight()/1.38, entity.posZ);
-        Vec3d endPos = startPos.add(new Vec3d(entity.getLookVec().x * length, entity.getLookVec().y * length, entity.getLookVec().z * length));
-        return entity.world.rayTraceBlocks(startPos, endPos);
     }
 
     public float getExplosionDamage() {
