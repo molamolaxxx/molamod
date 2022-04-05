@@ -1,6 +1,5 @@
 {
-  "parent": "block/cube_all",
-  "textures": {
-    "all": "molamod:block/grass_block"
+  "variants":{
+    "normal": { "model": "molamod:grass_block" }
   }
 }

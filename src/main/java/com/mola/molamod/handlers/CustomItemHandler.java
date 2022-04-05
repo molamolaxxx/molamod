@@ -4,7 +4,10 @@ import com.google.common.collect.Maps;
 import com.mola.molamod.MolaMod;
 import com.mola.molamod.items.IModelRender;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemBlock;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.RegistryEvent;
+import org.apache.logging.log4j.core.util.Assert;
 
 import java.util.List;
 import java.util.Map;
@@ -23,12 +26,17 @@ public class CustomItemHandler {
      */
     private Map<Class<? extends Item>, Item> itemMap = Maps.newLinkedHashMap();
 
+    private Map<String, ItemBlock> itemBlockMap = Maps.newLinkedHashMap();
+
     /**
      * 注册物品
      * @param item
      */
     public void add(Item item) {
         itemMap.putIfAbsent(item.getClass(), item);
+        if (item instanceof ItemBlock) {
+            itemBlockMap.put(item.getRegistryName().toString(), (ItemBlock)item);
+        }
     }
 
     /**
@@ -38,6 +46,11 @@ public class CustomItemHandler {
      */
     public <T> T getItem(Class<T> clazz) {
         return (T) itemMap.get(clazz);
+    }
+
+    public ItemBlock getItemBlock(ResourceLocation registryName) {
+        Assert.requireNonEmpty(registryName, "registryName is null");
+        return itemBlockMap.get(registryName.toString());
     }
 
     public List<Item> getItemList() {
@@ -51,8 +64,8 @@ public class CustomItemHandler {
      * @param event
      */
     public void registerItemsAndRendering(RegistryEvent.Register<Item> event) {
+        event.getRegistry().registerAll(this.getItemList().toArray(new Item[0]));
         for (Item item : this.getItemList()) {
-            event.getRegistry().register(item);
             // 渲染物品
             if (item instanceof IModelRender && !MolaMod.isServer()) {
                 ((IModelRender) item).onItemRender();

@@ -3,7 +3,7 @@ package com.mola.molamod.handlers;
 import com.google.common.collect.Maps;
 import com.mola.molamod.MolaMod;
 import com.mola.molamod.items.IModelRender;
-import net.minecraft.item.Item;
+import net.minecraft.block.Block;
 import net.minecraftforge.event.RegistryEvent;
 
 import java.util.List;
@@ -16,19 +16,19 @@ import java.util.stream.Collectors;
  * @Description:
  * @date : 2020-11-03 18:29
  **/
-public class CustomItemHandler {
+public class CustomBlockHandler {
 
     /**
-     * 物品列表
+     * 方块列表
      */
-    private Map<Class<? extends Item>, Item> itemMap = Maps.newLinkedHashMap();
+    private Map<Class<? extends Block>, Block> blockMap = Maps.newLinkedHashMap();
 
     /**
-     * 注册物品
-     * @param item
+     * 注册方块
+     * @param block
      */
-    public void add(Item item) {
-        itemMap.putIfAbsent(item.getClass(), item);
+    public void add(Block block) {
+        blockMap.putIfAbsent(block.getClass(), block);
     }
 
     /**
@@ -37,11 +37,11 @@ public class CustomItemHandler {
      * @return
      */
     public <T> T getItem(Class<T> clazz) {
-        return (T) itemMap.get(clazz);
+        return (T) blockMap.get(clazz);
     }
 
-    public List<Item> getItemList() {
-        return itemMap.entrySet().stream()
+    public List<Block> getBlockList() {
+        return blockMap.entrySet().stream()
                 .map(e -> e.getValue())
                 .collect(Collectors.toList());
     }
@@ -50,12 +50,12 @@ public class CustomItemHandler {
      * 总线调用，注册物品，
      * @param event
      */
-    public void registerItemsAndRendering(RegistryEvent.Register<Item> event) {
-        for (Item item : this.getItemList()) {
-            event.getRegistry().register(item);
+    public void registerBlocksAndRendering(RegistryEvent.Register<Block> event) {
+        event.getRegistry().registerAll(this.getBlockList().toArray(new Block[0]));
+        for (Block block : this.getBlockList()) {
             // 渲染物品
-            if (item instanceof IModelRender && !MolaMod.isServer()) {
-                ((IModelRender) item).onItemRender();
+            if (block instanceof IModelRender && !MolaMod.isServer()) {
+                ((IModelRender) block).onItemRender();
             }
         }
     }

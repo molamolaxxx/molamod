@@ -6,3 +6,5 @@ item.mola.mola_item.name=mola core
 item.mola.wbb_jp.name=wbb jp
 
 itemGroup.molatab=information and magic
+
+tile.mola.grass_block=grass block

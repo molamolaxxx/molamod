@@ -1,12 +1,16 @@
 package com.mola.molamod.factory;
 
+import com.mola.molamod.annotation.CustomBlock;
 import com.mola.molamod.annotation.CustomCommand;
 import com.mola.molamod.annotation.CustomItem;
 import com.mola.molamod.annotation.CustomPacket;
+import com.mola.molamod.handlers.CustomBlockHandler;
 import com.mola.molamod.handlers.CustomCommandHandler;
 import com.mola.molamod.handlers.CustomItemHandler;
 import com.mola.molamod.handlers.CustomPacketHandler;
+import com.mola.molamod.items.block.MolaItemBlock;
 import com.mola.molamod.utils.LoggerUtil;
+import net.minecraft.block.Block;
 import net.minecraft.command.ICommand;
 import net.minecraft.item.Item;
 import net.minecraftforge.fml.relauncher.Side;
@@ -59,6 +63,13 @@ public class CustomHandlerRegistry {
                                     String className = jarEntryName.substring(0, jarEntryName.lastIndexOf(".")).replace("/", ".");
                                     try {
                                         Class<?> clazz = Class.forName(className);
+                                        // 获取方块
+                                        Annotation customBlockAnnotation = clazz.getAnnotation(CustomBlock.class);
+                                        if (null != customBlockAnnotation) {
+                                            handleRegisterBlock(clazz);
+                                            continue;
+                                        }
+
                                         // 获取物品
                                         Annotation customItemAnnotation = clazz.getAnnotation(CustomItem.class);
                                         if (null != customItemAnnotation) {
@@ -111,6 +122,25 @@ public class CustomHandlerRegistry {
         } else {
             logger.error("[registry] handleRegisterItem 出现错误, class = {}",clazz.toString() );
         }
+    }
+
+    private static void handleRegisterBlock(Class clazz) {
+        CustomBlockHandler blockHandler = CustomHandlerManager.getBlockHandler();
+        Asserts.notNull(clazz, "[registry] class不能为空");
+        Block target = null;
+        try {
+            target = (Block) clazz.newInstance();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (null != target) {
+            blockHandler.add(target);
+        } else {
+            logger.error("[registry] handleRegisterBlock 出现错误, class = {}",clazz.toString() );
+        }
+        // 注册方块对应物品
+        CustomItemHandler itemHandler = CustomHandlerManager.getItemHandler();
+        itemHandler.add(new MolaItemBlock(target).setRegistryName(target.getRegistryName()));
     }
 
     private static void handleRegisterCommand(Class clazz) {

@@ -2,8 +2,10 @@ package com.mola.molamod.eventbus;
 
 import com.mola.molamod.MolaMod;
 import com.mola.molamod.factory.CustomHandlerManager;
+import com.mola.molamod.handlers.CustomBlockHandler;
 import com.mola.molamod.handlers.CustomItemHandler;
 import com.mola.molamod.utils.LoggerUtil;
+import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -24,9 +26,15 @@ public class MolaEventBusSubscriber {
     @SubscribeEvent
     public static void onItemRegister(RegistryEvent.Register<Item> event) {
         CustomItemHandler itemHandler = CustomHandlerManager.getItemHandler();
-
         // subscribe
         logger.info("[onItemRegister] 开始注册物品");
-        CustomHandlerManager.getItemHandler().registerItemsAndRendering(event);
+        itemHandler.registerItemsAndRendering(event);
+    }
+
+    @SubscribeEvent
+    public static void onBlockRegister(RegistryEvent.Register<Block> event) {
+        CustomBlockHandler blockHandler = CustomHandlerManager.getBlockHandler();
+        logger.info("[onItemRegister] 开始注册方块");
+        blockHandler.registerBlocksAndRendering(event);
     }
 }

@@ -13,6 +13,5 @@ public class MolaItemBlock extends ItemBlock {
 
     public MolaItemBlock(Block block) {
         super(block);
-        registerItemBlock(block, this);
     }
 }
